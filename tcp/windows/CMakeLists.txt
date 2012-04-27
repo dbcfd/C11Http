@@ -1,0 +1,20 @@
+set (TARGET TcpWindows)
+add_definitions(-DTCP_WINDOWS_BUILD)
+
+file(GLOB_RECURSE HEADERS "*.h")
+
+file(GLOB_RECURSE SOURCES "*.cpp")
+
+if(UNIX)
+	set(DEPENDENCIES rt)
+endif()	
+
+SET (DEPENDENCIES ${DEPENDENCIES})
+
+add_library (${TARGET} SHARED ${HEADERS} ${SOURCES}) 
+target_link_libraries (${TARGET} ${DEPENDENCIES})
+
+set_target_properties (${TARGET} PROPERTIES
+    SOVERSION ${PROJECT_SO_VERSION})
+
+install (TARGETS ${TARGET} RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
