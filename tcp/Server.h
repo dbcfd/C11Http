@@ -35,8 +35,9 @@ public:
      */
     void shutdown();
 
+    virtual void receiveComplete(const std::string& identifier, const char* data, const unsigned int count) = 0;
+
 private:
-	void receiveComplete(const std::string& identifier, const char* data, const unsigned int count);
 
 	class PlatformCallback;
 	class PlatformServer;

@@ -9,7 +9,6 @@ if(UNIX)
 endif()	
 
 set(gtest_dir ${BASE_DIRECTORY}/thirdparty/gtest-1.6.0/include)
-message("adding gtest support from ${gtest_dir}")
 include_directories(${gtest_dir})
 
 SET (DEPENDENCIES ${DEPENDENCIES} Tcp gtest)

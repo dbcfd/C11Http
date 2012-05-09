@@ -33,9 +33,9 @@ public:
 	 */
 	void disconnect();
 
-private:
-	void receiveComplete(const std::string& identifier, const char* data, const unsigned int count);
+	virtual void receiveComplete(const std::string& identifier, const char* data, const unsigned int count) = 0;
 
+private:
 	class PlatformCallback;
 	class PlatformClient;
 
