@@ -241,4 +241,5 @@ if (gtest_build_tests)
   py_test(gtest_xml_output_unittest)
 endif()
 
-SetVSTargetProperties(${TARGET})
+SetVSTargetProperties(gtest)
+SetVSTargetProperties(gtest_main)
