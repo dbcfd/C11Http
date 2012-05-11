@@ -33,14 +33,11 @@ public:
 	throw (std::runtime_error);
 	~ServerConnection();
 
-	void setIdentifier(const std::string& identifier);
-
 	const SOCKET getSocket() const;
 	const DWORD& getBytes() const;
 	const char* getBuffer() const;
 	LPWSABUF getDataBuffer();
 	const DWORD& getOperation() const;
-	const std::string& getIdentifier() const;
 	Server* getServer() const;
 
 private:
@@ -49,7 +46,6 @@ private:
 	char mBuffer[MAX_BUFFER_SIZE];//storage buffer
 	WSABUF mDataBuffer;//Winsock2 specific buffer for send/recv
 	Server* mServer;//Server that has this connection
-	std::string mIdentifier;
 	DWORD mOperation;
 
 };

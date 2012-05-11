@@ -26,6 +26,7 @@ include(SetVSTargetProperties)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_subdirectory(workers)
 add_subdirectory(tcp)
 add_subdirectory(thirdparty)
 add_subdirectory(test)

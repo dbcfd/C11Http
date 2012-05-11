@@ -11,10 +11,10 @@ namespace tcp {
 namespace windows {
 
 /**
- * Callback invoked after server has received connection information from a client. Connection
- * information is sent after the server sends acknowledgement to client.
+ * Callback invoked after server receives data from a client. Passes the client information to the
+ * server callback
  */
-void CALLBACK ConnectionInformationReceivedFromClient(
+void CALLBACK ClientDataReady(
         IN DWORD dwError,
         IN DWORD cbTransferred,
         IN LPWSAOVERLAPPED lpOverlapped,
@@ -25,14 +25,11 @@ void CALLBACK ConnectionInformationReceivedFromClient(
     ServerConnection* client = overlap->derived;
     Server* server = client->getServer();
 
-    std::string identifier( client->getBuffer(), cbTransferred );
+    server->queueReceiveFromConnection( client );
 
     Callback* callback = server->getCallback();
 
-    if( 0 != callback ) callback->connected( identifier );
-
-    server->addConnection( client, identifier );
-    server->queueReceiveFromConnection( client );
+    if( nullptr != callback ) callback->receiveComplete(client->getBuffer(), client->getBytes());
 }
 
 /**
@@ -321,9 +318,8 @@ void Server::addNewConnection() throw(std::runtime_error)
     DWORD nbBytes = 0;
 
     /**
-     * When a connection is formed, we need to receive information from the client
-     * that indicates that the client is connected, and information about that
-     * client. We queue a receive that will call back to a method that
+     * When a connection is formed, we will be receiving information from that client at
+     * some point in time. We queue a receive that will call back to a method that
      * can handle the connection information.
      */
     int iResult = WSARecv(connection->getSocket(), //socket
@@ -345,10 +341,6 @@ void Server::addNewConnection() throw(std::runtime_error)
             throw(std::runtime_error(sstr.str()));
         }
     }
-
-    //send an acknowledgement to the client, using a synchronous send
-    std::string ack("ack");
-    send(ack.c_str(), ack.size(), connection, false);
 
     //prepare for another client to connect
     prepareForServerConnection();

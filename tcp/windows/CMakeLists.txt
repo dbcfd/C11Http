@@ -5,11 +5,11 @@ file(GLOB_RECURSE HEADERS "*.h")
 
 file(GLOB_RECURSE SOURCES "*.cpp")
 
-if(UNIX)
-	set(DEPENDENCIES rt)
-endif()	
+set(DEPENDENCIES ${DEPENDENCIES} TcpInterface)
 
-SET (DEPENDENCIES ${DEPENDENCIES})
+if(UNIX)
+	set(DEPENDENCIES ${DEPENDENCIES} rt)
+endif()	
 
 add_library (${TARGET} SHARED ${HEADERS} ${SOURCES}) 
 target_link_libraries (${TARGET} ${DEPENDENCIES})
