@@ -2,11 +2,13 @@
 
 #include <vector>
 
-#include "tcp/posix/Platform.h"
-#include "tcp/posix/posix.h"
+#include "client/interface/IClient.h"
+
+#include "client/posix/Platform.h"
+#include "client/posix/posix.h"
 
 namespace c11http {
-namespace tcp {
+namespace client {
 namespace posix {
 
 class Callback;
@@ -15,40 +17,30 @@ class Callback;
  * Posix implementation of a client, which is a connection to some server. This class is implemented asynchronously
  * and will not create any additional threads.
  */
-class TCP_POSIX_API Client
+class CLIENT_POSIX_API Client : public IClient
 {
 public:
     /**
      * Connection a specific server listening at hostname:port. Users are notified of events via the specified
      * callback, and the identifier is sent to the server on connection.
      */
-    Client(Callback* callback, const std::string& hostname,
-            const unsigned int port, const std::string& identifier)
-                    throw (std::runtime_error);
+    Client(Callback* callback, const std::string& hostname, const unsigned int port, const std::string& identifier);;
     ~Client();
 
     /**
      * Block the current thread, waiting for events. This will unblock when data is ready to be sent/recv'd or
      * a disconnection request is received.
      */
-    virtual void waitForEvents() throw (std::runtime_error);
+    virtual void connectToServer(const std::string& hostname, const unsigned int port);
     /**
      * Send data to the connected server.
      */
-    virtual void sendDataToServer(const char* data, const unsigned int count)
-            throw (std::runtime_error);
+    virtual objects::HttpResponse sendRequestToServer(const objects::HttpRequest& req);
     /**
      * Disconnect from the server, closing the connection.
      */
-    virtual void disconnect() throw (std::runtime_error);
-
-    const bool isConnected() const;
-
-    const int getSocket() const;
-	const char* getBuffer() const;
+    virtual void disconnect();
 private:
-    Callback* getCallback() const;
-
     /**
      * Perform the wait action.
      */
@@ -66,7 +58,6 @@ private:
      */
     void performWakeup();
 
-    Callback* mCallback;
     int mWakeupPipe[2];
     int mFdMax;
     bool mConnected;

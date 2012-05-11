@@ -1,22 +1,17 @@
-
 #ifdef WINDOWS
-#include "tcp/windows/Client.h"
+#include "client/windows/Client.h"
 
 #include <sstream>
 
-#include "tcp/windows/Socket.h"
-#include "tcp/windows/Callback.h"
+#include "client/windows/Socket.h"
+#include "client/windows/Callback.h"
 
 namespace c11http {
-namespace tcp {
+namespace client {
 namespace windows {
 
-Client::Client(Callback* _callback, const std::string& hostname, const unsigned int port,
-        const std::string& onConnectMessage) throw(std::runtime_error) :
-        mCallback(_callback), mBytes(0), mOperation(Socket::OP_WAITING), mIdentifier(hostname), mConnected(
-                false)
-{
-    //startup winsock
+Client::Client(const IClient::ClientResponseCallback& callback) : IClient(callback), mBytes(0) {
+   //startup winsock
     WSAData wsaData;
     int iResult;
     iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -28,7 +23,9 @@ Client::Client(Callback* _callback, const std::string& hostname, const unsigned 
         WSACleanup();
         throw(std::runtime_error(sstr.str()));
     }
+}
 
+void Client::connect(const std::string& hostname, const unsigned int port) {
     //define where we're connecting to
     struct addrinfo* results = NULL, *addrptr, hints;
     ZeroMemory(&hints, sizeof(hints));
@@ -95,61 +92,16 @@ Client::Client(Callback* _callback, const std::string& hostname, const unsigned 
         sstr << "Failed to create client connection" << std::endl;
         throw(std::runtime_error(sstr.str()));
     }
-
-    //wait for an acknowledgement that server is ready for identifier
-    char ackBuff[4];
-    ::recv(mSocket, ackBuff, sizeof(ackBuff), 0);
-    //send over our connection information
-    ::send(mSocket, onConnectMessage.c_str(), onConnectMessage.size(), 0);
-
     mDataBuffer.len = sizeof(mBuffer);
     mDataBuffer.buf = mBuffer;
-    mOperation = Socket::OP_WAITING;
     createOverlap(this);
     mSendOverlap = new Overlap<Client>(this);
-
-    mConnected = true;
 
     //queue our receive, we are now ready to go
     prepareClientToReceiveData();
 }
 
-const SOCKET Client::getSocket() const
-{
-    return mSocket;
-}
-const DWORD& Client::getBytes() const
-{
-    return mBytes;
-}
-const char* Client::getBuffer() const
-{
-    return mBuffer;
-}
-const WSABUF& Client::getDataBuffer() const
-{
-    return mDataBuffer;
-}
-const DWORD& Client::getOperation() const
-{
-    return mOperation;
-}
-const std::string& Client::getIdentifier() const
-{
-    return mIdentifier;
-}
-
-Callback* Client::getCallback()
-{
-    return mCallback;
-}
-
-const bool Client::isConnected() const
-{
-    return mConnected;
-}
-
-void Client::prepareClientToReceiveData() throw(std::runtime_error)
+void Client::prepareClientToReceiveData()
 {
     DWORD flags = 0;
     DWORD nbBytesReceived = 0;
@@ -180,6 +132,7 @@ void Client::prepareClientToReceiveData() throw(std::runtime_error)
         /**
          * We received some data, pass it along to the callback, and attempt to queue another receive.
          */
+         
         Callback* callback = getCallback();
 
         if(0 != callback)

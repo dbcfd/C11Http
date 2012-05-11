@@ -1,3 +1,3 @@
 #pragma once
 
-#define TCP_POSIX_API
+#define CLIENT_POSIX_API
