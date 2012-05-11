@@ -1,36 +1,28 @@
 #pragma once
 
+#include "workers/Platform.h"
+
+#include "objects/HttpRequestToResponse.h"
+
 #include <future>
-#include <functional>
+#include <atomic>
 
 namespace c11http {
 namespace workers {
 
-template<class FuncType>
-class Worker {
+class WORKERS_API Worker {
 public :
-   Worker() {
+   typedef std::tuple<objects::HttpRequest, objects::HttpRequestToResponse> Work;
+   Worker();
+   ~Worker();
 
-   }
-   ~Worker() {
-      mShutdown = true;
-      mPromiseToWork.set_value(FuncType());
-   }
+   void threadEntryPoint();
 
-   void threadEntryPoint() {
-      while(!mShutdown) {
-         auto ftr = mPromiseToWork.get_future();
-         ftr.wait();
-         FuncType func = ftr.get();
-         func();
-      }
-   }
-
-   void provideWork(const FuncType& func);
+   void provideWork(const Work& work);
 
 private:
-   std::promise<FuncType> mPromiseToWork;
-   std::atomic mShutdown;
+   std::promise<Work> mPromiseToWork;
+   std::atomic<bool> mShutdown;
 };
 
 }

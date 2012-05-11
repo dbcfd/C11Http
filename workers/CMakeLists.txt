@@ -5,8 +5,10 @@ file(GLOB HEADERS "*.h")
 
 file(GLOB SOURCES "*.cpp")
 
+set(DEPENDENCIES ${DEPENDENCIES} Objects)
+
 if(UNIX)
-	set(DEPENDENCIES rt)
+	set(DEPENDENCIES ${DEPENDENCIES} rt)
 endif()	
 
 add_library (${TARGET} SHARED ${HEADERS} ${SOURCES}) 

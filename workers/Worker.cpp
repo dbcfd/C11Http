@@ -1,5 +1,8 @@
 #include "workers/Worker.h"
 
+#include "objects/HttpRequest.h"
+#include "objects/HttpResponse.h"
+
 namespace c11http {
 namespace workers {
 
@@ -8,18 +11,27 @@ Worker::Worker() {
 }
 
 Worker::~Worker() {
-   mPromiseToWork.set_value([](){mShutdown = true;});
+   auto reqToResp = [this](objects::HttpRequest) -> objects::HttpResponse {
+      mShutdown = true;
+      return objects::HttpResponse();
+   };
+   Work work = std::tuple<objects::HttpRequest, objects::HttpRequestToResponse>(objects::HttpRequest(), reqToResp);
+   mPromiseToWork.set_value(work);
 }
 
 void Worker::threadEntryPoint() {
-   while(!shutdown) {
-      std::future futureWork = mPromiseToWork.get_future();
+   while(!mShutdown) {
+      std::future<Work> futureWork = mPromiseToWork.get_future();
       futureWork.wait();
-      std::function func = futureWork.get();
-      func();
+      Work work = futureWork.get();
+      objects::HttpRequestToResponse reqToResp = std::get<1>(work);
+      reqToResp(std::get<0>(work));
    }
 }
 
-void Worker::fulfillPromise(const std::function& func) {
-   mPromiseToWork.set_value(func);
+void Worker::provideWork(const Worker::Work& work) {
+   mPromiseToWork.set_value(work);
+}
+
+}
 }
