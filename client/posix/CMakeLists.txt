@@ -1,23 +1,15 @@
-add_subdirectory(interface)
-add_subdirectory(posix)
-add_subdirectory(windows)
+set (TARGET ClientPosix)
+add_definitions(-DCLIENT_POSIX_BUILD)
 
-set (TARGET Tcp)
-add_definitions(-DTCP_BUILD)
+file(GLOB_RECURSE HEADERS "*.h")
 
-file(GLOB HEADERS "*.h")
+file(GLOB_RECURSE SOURCES "*.cpp")
 
-file(GLOB SOURCES "*.cpp")
+set(DEPENDENCIES ${DEPENDENCIES} ClientInterface)
 
 if(UNIX)
 	set(DEPENDENCIES ${DEPENDENCIES} rt)
 endif()	
-
-if(UNIX)
-	SET (DEPENDENCIES ${DEPENDENCIES} TcpPosix)
-else()
-	SET (DEPENDENCIES ${DEPENDENCIES} TcpWindows)
-endif()
 
 add_library (${TARGET} SHARED ${HEADERS} ${SOURCES}) 
 target_link_libraries (${TARGET} ${DEPENDENCIES})

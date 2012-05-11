@@ -1,15 +1,23 @@
-set (TARGET TcpInterface)
-add_definitions(-DTCP_INTERFACE_BUILD)
+add_subdirectory(interface)
+add_subdirectory(posix)
+add_subdirectory(windows)
+
+set (TARGET Server)
+add_definitions(-DHTTP_BUILD)
 
 file(GLOB HEADERS "*.h")
 
 file(GLOB SOURCES "*.cpp")
 
-set(DEPENDENCIES ${DEPENDENCIES} Workers)
-
 if(UNIX)
 	set(DEPENDENCIES ${DEPENDENCIES} rt)
 endif()	
+
+if(UNIX)
+	SET (DEPENDENCIES ${DEPENDENCIES} ServerPosix)
+else()
+	SET (DEPENDENCIES ${DEPENDENCIES} ServerWindows)
+endif()
 
 add_library (${TARGET} SHARED ${HEADERS} ${SOURCES}) 
 target_link_libraries (${TARGET} ${DEPENDENCIES})

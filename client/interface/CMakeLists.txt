@@ -1,11 +1,11 @@
-set (TARGET TcpPosix)
-add_definitions(-DTCP_POSIX_BUILD)
+set (TARGET ClientInterface)
+add_definitions(-DCLIENT_INTERFACE_BUILD)
 
-file(GLOB_RECURSE HEADERS "*.h")
+file(GLOB HEADERS "*.h")
 
-file(GLOB_RECURSE SOURCES "*.cpp")
+file(GLOB SOURCES "*.cpp")
 
-set(DEPENDENCIES ${DEPENDENCIES} TcpInterface)
+set(DEPENDENCIES ${DEPENDENCIES} Workers Objects)
 
 if(UNIX)
 	set(DEPENDENCIES ${DEPENDENCIES} rt)

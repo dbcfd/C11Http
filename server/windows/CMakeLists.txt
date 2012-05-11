@@ -1,11 +1,11 @@
-set (TARGET TcpWindows)
-add_definitions(-DTCP_WINDOWS_BUILD)
+set (TARGET ServerWindows)
+add_definitions(-DSERVER_WINDOWS_BUILD)
 
 file(GLOB_RECURSE HEADERS "*.h")
 
 file(GLOB_RECURSE SOURCES "*.cpp")
 
-set(DEPENDENCIES ${DEPENDENCIES} TcpInterface)
+set(DEPENDENCIES ${DEPENDENCIES} ServerInterface)
 
 if(UNIX)
 	set(DEPENDENCIES ${DEPENDENCIES} rt)
